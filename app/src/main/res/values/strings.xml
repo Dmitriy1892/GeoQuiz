@@ -13,6 +13,10 @@
     <string name="question_africa">3 The source of the Nile River is in Egypt.</string>
     <string name="question_americas">4 The Amazon River is the longest river in the Americas.</string>
     <string name="question_asia">5 Lake Baikal is the world\'s oldest and deepest freshwater lake.</string>
-    <string name="question_australia">6 Canberra is the capitak of Australia.</string>
+    <string name="question_australia">6 Canberra is the capital of Australia.</string>
 
+    <string name="warning_text">Are you sure you want to do this?</string>
+    <string name="show_answer_button">Show Answer</string>
+    <string name="cheat_button">Cheat!</string>
+    <string name="judgment_toast">Cheating is wrong. Start challenge again.</string>
 </resources>

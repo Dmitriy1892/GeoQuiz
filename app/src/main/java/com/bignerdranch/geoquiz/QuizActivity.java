@@ -3,6 +3,8 @@ package com.bignerdranch.geoquiz;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -17,6 +19,7 @@ public class QuizActivity extends AppCompatActivity {
     private Button mFalseButton;
     private Button mNextButton;
     private Button mPrevButton;
+    private Button mCheatButton;
     private TextView mQuestionTextView;
 
     private Question[] mQuestionBank = new Question[] {
@@ -29,9 +32,11 @@ public class QuizActivity extends AppCompatActivity {
     };
 
     private int mCurrentIndex = 0;
+    private boolean mIsCheater;
 
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private int rightAnswers = 0;
     private boolean[] answerChecker = new boolean[mQuestionBank.length];
@@ -67,6 +72,16 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 checkAnswer(false);
+            }
+        });
+
+        mCheatButton = (Button) findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                startActivityForResult(intent, REQUEST_CODE_CHEAT);
             }
         });
 
@@ -128,35 +143,37 @@ public class QuizActivity extends AppCompatActivity {
         int question = mQuestionBank[mCurrentIndex].geTextResId();
         mQuestionTextView.setText(question);
         if (answerChecker[mCurrentIndex] == false) {
-            mTrueButton.setEnabled(true);
-            mFalseButton.setEnabled(true);
+            lockUnlockButtons(true);
         } else {
-            mTrueButton.setEnabled(false);
-            mFalseButton.setEnabled(false);
+            lockUnlockButtons(false);
         }
     }
 
     private void checkAnswer(Boolean userPressedTrue) {
-        if (userPressedTrue == mQuestionBank[mCurrentIndex].isAnswerTrue()) {
-            Toast toast = Toast.makeText(QuizActivity.this,R.string.correct_toast, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 300);
-            toast.show();
-            mTrueButton.setEnabled(false);
-            mFalseButton.setEnabled(false);
-            rightAnswers +=1;
-            answerChecker[mCurrentIndex] = true;
-            isAllQuestionAswered();
-
+        int messageResId = 0;
+        if (mIsCheater) {
+            messageResId = R.string.judgment_toast;
+            breakVariables();
+            mIsCheater = false;
         } else {
-            Toast toast = Toast.makeText(QuizActivity.this,R.string.incorrect_toast, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP, 0, 300);
-            toast.show();
-            mTrueButton.setEnabled(false);
-            mFalseButton.setEnabled(false);
-            answerChecker[mCurrentIndex] = true;
-            isAllQuestionAswered();
 
+            if (userPressedTrue == mQuestionBank[mCurrentIndex].isAnswerTrue()) {
+                messageResId = R.string.correct_toast;
+                lockUnlockButtons(false);
+                rightAnswers +=1;
+                answerChecker[mCurrentIndex] = true;
+                isAllQuestionAswered();
+
+            } else {
+                messageResId = R.string.incorrect_toast;
+                lockUnlockButtons(false);
+                answerChecker[mCurrentIndex] = true;
+                isAllQuestionAswered();
+            }
         }
+        Toast toast = Toast.makeText(QuizActivity.this, messageResId, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP, 0, 200);
+        toast.show();
 
     }
 
@@ -168,8 +185,10 @@ public class QuizActivity extends AppCompatActivity {
             if (mCurrentIndex == 0) {
                 mCurrentIndex = mQuestionBank.length - 1;
                 updateQuestion();
-            } else {mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
-            updateQuestion();}
+            } else {
+                mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
+                updateQuestion();
+            }
         }
 
     }
@@ -184,16 +203,38 @@ public class QuizActivity extends AppCompatActivity {
             }
         }
 
-        Integer intAnswer = rightAnswers;
-        Toast toast = Toast.makeText(QuizActivity.this, "Number of right answers: "+ intAnswer.toString(), Toast.LENGTH_SHORT);
+        Integer persentAnswer = rightAnswers * 100 /mQuestionBank.length;
+        Toast toast = Toast.makeText(QuizActivity.this, "Right answers: "+ persentAnswer.toString()+"%", Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.TOP, 0, 300);
         toast.show();
+        breakVariables();
+        return true;
+    }
+
+    private void breakVariables() {
         for (int i = 0; i < answerChecker.length; i++) {
             answerChecker[i] = false;
         }
         rightAnswers = 0;
-        mTrueButton.setEnabled(true);
-        mFalseButton.setEnabled(true);
-        return true;
+        lockUnlockButtons(true);
+    }
+
+    private void lockUnlockButtons(Boolean isUnlock) {
+        mTrueButton.setEnabled(isUnlock);
+        mFalseButton.setEnabled(isUnlock);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+        if (requestCode == REQUEST_CODE_CHEAT) {
+            if (data == null) {
+                return;
+            }
+            mIsCheater = CheatActivity.wasAnswerShown(data);
+        }
     }
 }
