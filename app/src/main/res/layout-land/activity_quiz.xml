@@ -50,5 +50,4 @@
             android:drawableRight="@drawable/arrow_right"
             android:drawablePadding="4dp"/>
     </LinearLayout>
-
 </FrameLayout>
