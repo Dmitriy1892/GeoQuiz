@@ -33,6 +33,9 @@ public class QuizActivity extends AppCompatActivity {
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
 
+    private int rightAnswers = 0;
+    private boolean[] answerChecker = new boolean[mQuestionBank.length];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,8 +127,13 @@ public class QuizActivity extends AppCompatActivity {
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].geTextResId();
         mQuestionTextView.setText(question);
-        mTrueButton.setEnabled(true);
-        mFalseButton.setEnabled(true);
+        if (answerChecker[mCurrentIndex] == false) {
+            mTrueButton.setEnabled(true);
+            mFalseButton.setEnabled(true);
+        } else {
+            mTrueButton.setEnabled(false);
+            mFalseButton.setEnabled(false);
+        }
     }
 
     private void checkAnswer(Boolean userPressedTrue) {
@@ -135,17 +143,19 @@ public class QuizActivity extends AppCompatActivity {
             toast.show();
             mTrueButton.setEnabled(false);
             mFalseButton.setEnabled(false);
+            rightAnswers +=1;
+            answerChecker[mCurrentIndex] = true;
+            isAllQuestionAswered();
 
-            //Toast.makeText(QuizActivity.this, R.string.correct_toast,
-             //       Toast.LENGTH_SHORT).show();
         } else {
             Toast toast = Toast.makeText(QuizActivity.this,R.string.incorrect_toast, Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 300);
             toast.show();
             mTrueButton.setEnabled(false);
             mFalseButton.setEnabled(false);
-            //Toast.makeText(QuizActivity.this, R.string.incorrect_toast,
-              //      Toast.LENGTH_SHORT).show();
+            answerChecker[mCurrentIndex] = true;
+            isAllQuestionAswered();
+
         }
 
     }
@@ -161,5 +171,29 @@ public class QuizActivity extends AppCompatActivity {
             } else {mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
             updateQuestion();}
         }
+
+    }
+
+    //проверяет, все ли вопросы отвечены если да - выдает Toast и обнуляет ответы, если нет - возвращает false
+    private boolean isAllQuestionAswered() {
+        for (int i = 0; i < answerChecker.length; i++) {
+            if (answerChecker[i] == true) {
+                continue;
+            } else {
+                return false;
+            }
+        }
+
+        Integer intAnswer = rightAnswers;
+        Toast toast = Toast.makeText(QuizActivity.this, "Number of right answers: "+ intAnswer.toString(), Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP, 0, 300);
+        toast.show();
+        for (int i = 0; i < answerChecker.length; i++) {
+            answerChecker[i] = false;
+        }
+        rightAnswers = 0;
+        mTrueButton.setEnabled(true);
+        mFalseButton.setEnabled(true);
+        return true;
     }
 }
