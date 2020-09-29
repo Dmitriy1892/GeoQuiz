@@ -1,5 +1,6 @@
 package com.bignerdranch.geoquiz;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -18,6 +19,9 @@ public class CheatActivity extends AppCompatActivity {
     private TextView mAnswerTextView;
     private Button mShowAnswerButton;
 
+    private static final String ANSWER_SHOWN_INDEX = "index";
+    private boolean mCheckAnswerShown = false;
+
     public static Intent newIntent(Context packageContext, boolean answerIsTrue) {
         Intent intent = new Intent(packageContext, CheatActivity.class);
         intent.putExtra(EXTRA_ANSWER_IS_TRUE, answerIsTrue);
@@ -31,6 +35,9 @@ public class CheatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            setAnswerShownResult(savedInstanceState.getBoolean(ANSWER_SHOWN_INDEX, false));
+        }
         setContentView(R.layout.activity_cheat);
 
         mAnswerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
@@ -46,8 +53,15 @@ public class CheatActivity extends AppCompatActivity {
                     mAnswerTextView.setText(R.string.false_button);
                 }
                 setAnswerShownResult(true);
+                mCheckAnswerShown = true;
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putBoolean(ANSWER_SHOWN_INDEX, mCheckAnswerShown);
     }
 
     private void setAnswerShownResult(boolean isAnswerShown) {

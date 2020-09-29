@@ -36,7 +36,10 @@ public class QuizActivity extends AppCompatActivity {
 
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    public static final String IS_CHEATER_INDEX = "mIsCheaterIndex";
     private static final int REQUEST_CODE_CHEAT = 0;
+    private static final String ANSWER_CHECKER_INDEX = "answerCheckerIndex";
+
 
     private int rightAnswers = 0;
     private boolean[] answerChecker = new boolean[mQuestionBank.length];
@@ -46,6 +49,9 @@ public class QuizActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+            mIsCheater = savedInstanceState.getBoolean(IS_CHEATER_INDEX, false);
+            answerChecker = savedInstanceState.getBooleanArray(ANSWER_CHECKER_INDEX);
+            updateQuestion();
         }
         Log.d(TAG, "onCreate(Bundle) called");
         setContentView(R.layout.activity_quiz);
@@ -137,6 +143,8 @@ public class QuizActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        savedInstanceState.putBoolean(IS_CHEATER_INDEX, mIsCheater);
+        savedInstanceState.putBooleanArray(ANSWER_CHECKER_INDEX, answerChecker);
     }
 
     private void updateQuestion() {
