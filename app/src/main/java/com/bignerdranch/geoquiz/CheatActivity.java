@@ -20,7 +20,9 @@ public class CheatActivity extends AppCompatActivity {
     private Button mShowAnswerButton;
 
     private static final String ANSWER_SHOWN_INDEX = "index";
+    private static final String ANSWER_ID_INDEX = "indexId";
     private boolean mCheckAnswerShown = false;
+    private int answerId;
 
     public static Intent newIntent(Context packageContext, boolean answerIsTrue) {
         Intent intent = new Intent(packageContext, CheatActivity.class);
@@ -36,32 +38,41 @@ public class CheatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            setAnswerShownResult(savedInstanceState.getBoolean(ANSWER_SHOWN_INDEX, false));
+            mCheckAnswerShown = savedInstanceState.getBoolean(ANSWER_SHOWN_INDEX, false);
+            setAnswerShownResult(mCheckAnswerShown);
+            answerId = savedInstanceState.getInt(ANSWER_ID_INDEX, 0);
         }
         setContentView(R.layout.activity_cheat);
 
         mAnswerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
 
         mAnswerTextView = (TextView) findViewById(R.id.answer_text_view);
+        if (answerId != 0) {
+            mAnswerTextView.setText(answerId);
+        }
         mShowAnswerButton = (Button) findViewById(R.id.show_answer_button);
         mShowAnswerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mAnswerIsTrue) {
-                    mAnswerTextView.setText(R.string.true_button);
+                    answerId = R.string.true_button;
+                    mAnswerTextView.setText(answerId);
                 } else {
-                    mAnswerTextView.setText(R.string.false_button);
+                    answerId = R.string.false_button;
+                    mAnswerTextView.setText(answerId);
                 }
                 setAnswerShownResult(true);
                 mCheckAnswerShown = true;
             }
         });
+
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putBoolean(ANSWER_SHOWN_INDEX, mCheckAnswerShown);
+        savedInstanceState.putInt(ANSWER_ID_INDEX, answerId);
     }
 
     private void setAnswerShownResult(boolean isAnswerShown) {

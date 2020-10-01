@@ -31,7 +31,7 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_australia, true)
     };
 
-    private int mCurrentIndex = 0;
+    private int mCurrentIndex;
     private boolean mIsCheater;
 
     private static final String TAG = "QuizActivity";
@@ -39,7 +39,6 @@ public class QuizActivity extends AppCompatActivity {
     public static final String IS_CHEATER_INDEX = "mIsCheaterIndex";
     private static final int REQUEST_CODE_CHEAT = 0;
     private static final String ANSWER_CHECKER_INDEX = "answerCheckerIndex";
-
 
     private int rightAnswers = 0;
     private boolean[] answerChecker = new boolean[mQuestionBank.length];
@@ -51,7 +50,6 @@ public class QuizActivity extends AppCompatActivity {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
             mIsCheater = savedInstanceState.getBoolean(IS_CHEATER_INDEX, false);
             answerChecker = savedInstanceState.getBooleanArray(ANSWER_CHECKER_INDEX);
-            updateQuestion();
         }
         Log.d(TAG, "onCreate(Bundle) called");
         setContentView(R.layout.activity_quiz);
@@ -106,6 +104,7 @@ public class QuizActivity extends AppCompatActivity {
                 goNextPrevQuestion(false);
             }
         });
+        updateQuestion();
     }
 
     @Override
