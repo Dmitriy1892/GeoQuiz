@@ -18,19 +18,25 @@ public class CheatActivity extends AppCompatActivity {
 
     private static final String EXTRA_ANSWER_IS_TRUE = "com.bignerdranch.geoquiz.answer_is_true";
     private static final String EXTRA_ANSWER_SHOWN = "com.bignerdranch.geoquiz.answer_shown";
+    public static final String EXTRA_CHEATS_QUANTITY = "com.bignerdranch.geoquiz.cheats_quantity";
     private boolean mAnswerIsTrue;
 
     private TextView mAnswerTextView;
     private Button mShowAnswerButton;
+    private TextView mApiLevel;
+    private TextView mCheatQuantity;
 
     private static final String ANSWER_SHOWN_INDEX = "index";
     private static final String ANSWER_ID_INDEX = "indexId";
+    private static final String HOW_MANY_CHEATING_INDEX = "cheatIndex";
     private boolean mCheckAnswerShown = false;
     private int answerId;
+    private Integer howManyCheating = 0;
 
-    public static Intent newIntent(Context packageContext, boolean answerIsTrue) {
+    public static Intent newIntent(Context packageContext, boolean answerIsTrue, int quantityCheats) {
         Intent intent = new Intent(packageContext, CheatActivity.class);
         intent.putExtra(EXTRA_ANSWER_IS_TRUE, answerIsTrue);
+        intent.putExtra(EXTRA_CHEATS_QUANTITY, quantityCheats);
         return intent;
     }
 
@@ -38,13 +44,19 @@ public class CheatActivity extends AppCompatActivity {
         return result.getBooleanExtra(EXTRA_ANSWER_SHOWN, false);
     }
 
+    public static int getCheatQuantity(Intent result) {
+        return result.getIntExtra(EXTRA_CHEATS_QUANTITY, 0);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        howManyCheating = getIntent().getIntExtra(EXTRA_CHEATS_QUANTITY, 0);
         if (savedInstanceState != null) {
             mCheckAnswerShown = savedInstanceState.getBoolean(ANSWER_SHOWN_INDEX, false);
             setAnswerShownResult(mCheckAnswerShown);
             answerId = savedInstanceState.getInt(ANSWER_ID_INDEX, 0);
+            howManyCheating = savedInstanceState.getInt(HOW_MANY_CHEATING_INDEX, 0);
         }
         setContentView(R.layout.activity_cheat);
 
@@ -64,8 +76,10 @@ public class CheatActivity extends AppCompatActivity {
                     answerId = R.string.false_button;
                     mAnswerTextView.setText(answerId);
                 }
-                setAnswerShownResult(true);
                 mCheckAnswerShown = true;
+                howManyCheating +=1;
+                mCheatQuantity.setText("Number of cheats: " + howManyCheating.toString());
+                setAnswerShownResult(true);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     int cx = mShowAnswerButton.getWidth() / 2;
@@ -85,6 +99,17 @@ public class CheatActivity extends AppCompatActivity {
                 }
             }
         });
+        setAnswerShownResult(false);
+        mApiLevel = (TextView) findViewById(R.id.api_level_text_view);
+        Integer api = Build.VERSION.SDK_INT;
+        mApiLevel.setText("API Level " + api.toString());
+
+        mCheatQuantity = (TextView) findViewById(R.id.how_many_cheating);
+        mCheatQuantity.setText("Number of cheats: " + howManyCheating.toString());
+
+        if (howManyCheating >= 3) {
+            mShowAnswerButton.setEnabled(false);
+        }
         if (answerId != 0) {
             mAnswerTextView.setText(answerId);
             mShowAnswerButton.setVisibility(View.INVISIBLE);
@@ -97,11 +122,14 @@ public class CheatActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putBoolean(ANSWER_SHOWN_INDEX, mCheckAnswerShown);
         savedInstanceState.putInt(ANSWER_ID_INDEX, answerId);
+        savedInstanceState.putInt(HOW_MANY_CHEATING_INDEX, howManyCheating);
     }
 
     private void setAnswerShownResult(boolean isAnswerShown) {
         Intent data = new Intent();
         data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown);
+        data.putExtra(EXTRA_CHEATS_QUANTITY, howManyCheating);
         setResult(RESULT_OK, data);
     }
+
 }

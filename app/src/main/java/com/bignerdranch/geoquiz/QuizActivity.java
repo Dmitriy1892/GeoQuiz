@@ -33,7 +33,9 @@ public class QuizActivity extends AppCompatActivity {
 
     private int mCurrentIndex;
     private boolean mIsCheater;
+    private int cheatQuantity;
 
+    private static final String CHEAT_QUANTITY_INTENT = "cheatQuantity";
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
     public static final String IS_CHEATER_INDEX = "mIsCheaterIndex";
@@ -50,6 +52,7 @@ public class QuizActivity extends AppCompatActivity {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
             mIsCheater = savedInstanceState.getBoolean(IS_CHEATER_INDEX, false);
             answerChecker = savedInstanceState.getBooleanArray(ANSWER_CHECKER_INDEX);
+            cheatQuantity = savedInstanceState.getInt(CHEAT_QUANTITY_INTENT);
         }
         Log.d(TAG, "onCreate(Bundle) called");
         setContentView(R.layout.activity_quiz);
@@ -84,7 +87,7 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
-                Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue, cheatQuantity);
                 startActivityForResult(intent, REQUEST_CODE_CHEAT);
             }
         });
@@ -144,6 +147,7 @@ public class QuizActivity extends AppCompatActivity {
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
         savedInstanceState.putBoolean(IS_CHEATER_INDEX, mIsCheater);
         savedInstanceState.putBooleanArray(ANSWER_CHECKER_INDEX, answerChecker);
+        savedInstanceState.putInt(CHEAT_QUANTITY_INTENT, cheatQuantity);
     }
 
     private void updateQuestion() {
@@ -235,12 +239,15 @@ public class QuizActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_OK) {
+            cheatQuantity = CheatActivity.getCheatQuantity(data);
             return;
         }
         if (requestCode == REQUEST_CODE_CHEAT) {
             if (data == null) {
+                cheatQuantity = CheatActivity.getCheatQuantity(data);
                 return;
             }
+            cheatQuantity = CheatActivity.getCheatQuantity(data);
             mIsCheater = CheatActivity.wasAnswerShown(data);
         }
     }
