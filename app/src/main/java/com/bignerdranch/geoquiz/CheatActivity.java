@@ -127,7 +127,12 @@ public class CheatActivity extends AppCompatActivity {
 
     private void setAnswerShownResult(boolean isAnswerShown) {
         Intent data = new Intent();
-        data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown);
+        if (howManyCheating == 0) {
+            data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown);
+        } else {
+            data.putExtra(EXTRA_ANSWER_SHOWN, true);
+        }
+
         data.putExtra(EXTRA_CHEATS_QUANTITY, howManyCheating);
         setResult(RESULT_OK, data);
     }
